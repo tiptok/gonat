@@ -13,7 +13,7 @@ type IUpData interface {
 var DownHandler IDownData
 
 type IDownData interface {
-	DownData(rcv model.IEntity)
+	DownData(rcv model.IEntity) (model.IEntity, error)
 }
 
 //企业信息缓存
@@ -23,3 +23,6 @@ var PInfoCahce *CacheBase
 var VehiclesCache *CacheBase
 
 var SubCliCache *CacheBase
+
+//在线列表
+var OnlineBuffer *OnlineList

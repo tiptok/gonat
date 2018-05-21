@@ -85,7 +85,7 @@ type UP_EXG_MSG_REAL_LOCATION struct {
 func (e *UP_EXG_MSG_REAL_LOCATION) GetConvEntity() IEntity {
 	termPos := &TermPosition{
 		Id:         comm.BinaryHelper.UniqueId(), //NewObjectId(),
-		SimNum:     "18860183011",
+		SimNum:     e.SimNum,
 		GpsTime:    e.GNSS_DATA.GPSTIME,
 		AlarmFlag:  int64(e.GNSS_DATA.ALARM),
 		StateFlag:  int64(e.GNSS_DATA.STATE),

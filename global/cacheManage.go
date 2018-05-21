@@ -108,10 +108,16 @@ type VehicleInfo struct {
 
 	VehicleOperateState int //车辆营运状态 1：营运 2：派单 3.维修 4.停运 5.报停
 	OperatorId          int //运营商编号 (809/自有协议接入使用)
+
+	Obj interface{} //所属连接信息(809存放AccessCode)
 }
 
 func (e VehicleInfo) Key() string {
 	return fmt.Sprintf("%v%v", e.PlateNum, e.ColorCode)
+}
+
+func (e *VehicleInfo) SetObj(obj interface{}) {
+	e.Obj = obj
 }
 
 /*MSVehiclesCacheLoader 终端车辆加载器*/

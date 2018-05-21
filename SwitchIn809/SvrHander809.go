@@ -77,8 +77,9 @@ func (trans *Tcp809Server) OnReceive(c *conn.Connector, d conn.TcpData) bool {
 			global.Info(global.F(global.TCP, global.SVR809, "收到 %v %v 主链路连接保持请求"), entity.AccessCode, c.RemoteAddress)
 		case model.J实时上传车辆定位信息:
 			bUpData = false
-			global.UpHandler.UpData((obj.(*model.UP_EXG_MSG_REAL_LOCATION)).GetConvEntity())
-			//global.Debug("接收到实体%v", obj)
+			location := obj.(*model.UP_EXG_MSG_REAL_LOCATION)
+			chkVehicleLogin(location)
+			global.UpHandler.UpData((location).GetConvEntity())
 		case model.J车辆定位信息自动补报:
 			bUpData = false
 			hisLocation := obj.(*model.UP_EXG_MSG_HISTORY_LOCATION)
@@ -87,6 +88,7 @@ func (trans *Tcp809Server) OnReceive(c *conn.Connector, d conn.TcpData) bool {
 					UP_EXG_MSG: hisLocation.UP_EXG_MSG,
 					GNSS_DATA:  val,
 				}
+				chkVehicleLogin(pos)
 				global.UpHandler.UpData(pos.GetConvEntity())
 			}
 		default:
@@ -139,4 +141,19 @@ func chkPlatInfo(req *model.UP_CONNECT_REQ) (result bool, errMsg string) {
 		errMsg = fmt.Sprintf("未找到企业,接入码:%v", req.AccessCode)
 	}
 	return result, errMsg
+}
+
+//检查车辆上线线
+func chkVehicleLogin(location *model.UP_EXG_MSG_REAL_LOCATION) {
+	sKey := fmt.Sprintf("%s%s", location.Vehicle_No, location.Vehicle_Color)
+	vehVal := global.VehiclesCache.GetCache(sKey)
+	if vehVal != nil {
+		vehInfo := vehVal.(*global.VehicleInfo)
+		location.SimNum = vehInfo.SimNum
+		if !(vehInfo.Obj.(string) == location.AccessCode) {
+			vehInfo.Obj = location.AccessCode
+			global.OnlineBuffer.Login(vehInfo) //上线
+		}
+		global.OnlineBuffer.List.Refresh(location.SimNum) //刷新上线时间
+	}
 }

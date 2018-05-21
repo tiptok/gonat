@@ -1,7 +1,10 @@
 package SwitchIn809
 
 import (
+	"log"
+
 	"github.com/tiptok/gonat/global"
+	"github.com/tiptok/gonat/model"
 	"github.com/tiptok/gotransfer/comm"
 	"github.com/tiptok/gotransfer/conn"
 )
@@ -27,6 +30,12 @@ func (svr *Tcp809Server) Start() bool {
 			Work:     svr.CheckClientExpire,
 		}
 		svr.SubClientExpireChk.RegistTask(taskChkExpire)
+
+		// taskChkOnlineBuffer := &comm.Task{
+		// 	Interval: 60,
+		// 	TaskId:   "OnlineExpireCheck",
+		// 	Work:     global.OnlineBuffer.ExClean,
+		// }
 
 		svr.Server.Start(svr)
 		svr.SubClientExpireChk.Start()
@@ -61,4 +70,23 @@ func (svr *Tcp809Server) OnRemvoe(k interface{}, val interface{}) {
 		global.Info("从链路 %v 执行超时处理", subCli.AccessCode)
 		subCli.Stop() //超时关闭  做从链路关闭操作
 	}
+}
+
+//DownData 下发指令
+func (trans *Tcp809Server) DownData(rcv model.IEntity) (model.IEntity, error) {
+	defer func() {
+		if p := recover(); p != nil {
+			log.Printf("SvrHander809 DownData panic recover! p: %v", p)
+		}
+	}()
+	var err error
+	baseEntity := rcv.GetEntityBase()
+	if baseEntity == nil {
+		return nil, nil
+	}
+	if val, ok := trans.SubList.GetOk(baseEntity.AccessCode); ok {
+		subcli := val.(*TcpSubClient)
+		err = subcli.DownCmd(rcv)
+	}
+	return nil, err
 }

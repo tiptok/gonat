@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"log"
 
+	"errors"
 	"fmt"
 
 	"github.com/tiptok/gonat/global"
@@ -60,26 +61,27 @@ func (subCli *TcpSubClient) ChKSubHeartBeart(obj interface{}) {
 	if subCli.Client != nil && subCli.Client.Conn != nil {
 		if !subCli.Client.Conn.IsConneted {
 			subCli.Client.ReStart()
-		}
-		if !subCli.IsLogin {
-			//发送从链路登录
-			subLogin := &model.DOWN_CONNECT_REQ{
-				EntityBase: model.EntityBase{
-					AccessCode: subCli.AccessCode,
-					MsgId:      model.J从链路连接请求,
-				},
-				VERIFY_CODE: subCli.VerifyCode,
-			}
-			SendCmdAsync(subCli.Client.Conn, subLogin)
 		} else {
-			//发送心跳
-			heart := &model.DOWN_LINKTEST_REQ{
-				EntityBase: model.EntityBase{
-					AccessCode: subCli.AccessCode,
-					MsgId:      model.J从链路连接保持请求,
-				},
+			if !subCli.IsLogin {
+				//发送从链路登录
+				subLogin := &model.DOWN_CONNECT_REQ{
+					EntityBase: model.EntityBase{
+						AccessCode: subCli.AccessCode,
+						MsgId:      model.J从链路连接请求,
+					},
+					VERIFY_CODE: subCli.VerifyCode,
+				}
+				SendCmdAsync(subCli.Client.Conn, subLogin)
+			} else {
+				//发送心跳
+				heart := &model.DOWN_LINKTEST_REQ{
+					EntityBase: model.EntityBase{
+						AccessCode: subCli.AccessCode,
+						MsgId:      model.J从链路连接保持请求,
+					},
+				}
+				SendCmdAsync(subCli.Client.Conn, heart)
 			}
-			SendCmdAsync(subCli.Client.Conn, heart)
 		}
 	}
 }
@@ -95,9 +97,9 @@ func (trans *TcpSubClient) OnConnect(c *conn.Connector) bool {
 
 //断开事件
 func (trans *TcpSubClient) OnClose(c *conn.Connector) {
-	//trans.SVR.SubList.Delete(trans.AccessCode)
-	trans.IsLogin = false
-	log.Println(global.F(global.TCP, global.SUB809, ""), c.RemoteAddress, "On Close.")
+	//trans.IsLogin = false
+	trans.Stop()
+	log.Println(global.F(global.TCP, global.SUB809, ""), c.RemoteAddress, "On Close.", len(trans.HeartTimerWork.TaskList))
 }
 
 //接收事件
@@ -152,6 +154,16 @@ func (trans *TcpSubClient) OnReceive(c *conn.Connector, d conn.TcpData) bool {
 	return true
 }
 
+//DownCmd 下发指令
+func (trans *TcpSubClient) DownCmd(rcv model.IEntity) error {
+	if trans.IsLogin {
+		SendCmdAsync(trans.Client.Conn, rcv)
+		global.Debug(global.F(global.TCP, global.SUB809, "%v 发送指令到终端"), trans.String())
+	} else {
+		return errors.New(fmt.Sprintf("%v 未登录,无连接", trans.String()))
+	}
+	return nil
+}
 func (trans *TcpSubClient) Stop() {
 	defer func() {
 		if p := recover(); p != nil {
@@ -160,5 +172,9 @@ func (trans *TcpSubClient) Stop() {
 	}()
 	trans.HeartTimerWork.Stop()                //心跳检查 停止
 	trans.SVR.SubList.Delete(trans.AccessCode) //从从链路列表中移除
-	trans.Stop()                               //Client Stop
+	//trans.Stop()                               //Client Stop
+}
+
+func (trans *TcpSubClient) String() string {
+	return fmt.Sprintf("IP:%v 接入码:%v 运营商名称:%v 登录账号:%v", trans.Client.Conn.RemoteAddress, trans.AccessCode, trans.PlatInfo.CompanyName, trans.PlatInfo.UserId)
 }
