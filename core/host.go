@@ -30,7 +30,9 @@ func (h *Host) Start(protocol string) {
 	case "JTB808":
 		h.NasServer = &SwitchIn808.Tcp808Server{}
 	case "JTB809":
-		h.NasServer = &SwitchIn809.Tcp809Server{}
+		server809 := &SwitchIn809.Tcp809Server{}
+		h.NasServer = server809
+		global.DownHandler = NewDownHandler(server809)
 	}
 	uphandler := &Up808Data{}
 	uphandler.BizDB = NewMSDBHandler()
