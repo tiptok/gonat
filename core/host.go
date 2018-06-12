@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"log"
 
 	"github.com/tiptok/gonat/SwitchIn808"
@@ -17,10 +18,19 @@ type Host struct {
 	//下行处理
 	//分发处理
 	//入库处理
+	BizList []IBiz
 }
 
 func (h *Host) Start(protocol string) {
 	var init bool = false
+	ctx, cancle := context.WithCancel(context.Background())
+	defer func() {
+		if p := recover(); p != nil {
+			log.Printf("Host Start panic recover! p: %v", p)
+			//debug.PrintStack()
+			cancle()
+		}
+	}()
 
 	//加载缓存管理
 	h.CacheMana = global.CacheManage{}
@@ -34,6 +44,8 @@ func (h *Host) Start(protocol string) {
 		h.NasServer = server809
 		global.DownHandler = NewDownHandler(server809)
 	}
+
+	h.startBiz(ctx)
 	uphandler := &Up808Data{}
 	uphandler.BizDB = NewMSDBHandler()
 	global.UpHandler = uphandler
@@ -42,4 +54,12 @@ func (h *Host) Start(protocol string) {
 		init = h.NasServer.Start()
 	}
 	log.Printf("Host Start %s Result:%v", protocol, init)
+}
+
+func (h *Host) startBiz(ctx context.Context) {
+	h.BizList = make([]IBiz, 0)
+	h.BizList = append(h.BizList, NewBizDBTdf())
+	for _, b := range h.BizList {
+		b.Start(ctx)
+	}
 }

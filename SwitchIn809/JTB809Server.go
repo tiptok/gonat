@@ -1,12 +1,18 @@
 package SwitchIn809
 
 import (
+	"errors"
 	"log"
 
 	"github.com/tiptok/gonat/global"
 	"github.com/tiptok/gonat/model"
 	"github.com/tiptok/gotransfer/comm"
 	"github.com/tiptok/gotransfer/conn"
+)
+
+var (
+	ErrSubClientNotExitst = errors.New("SwitchIn809: Sub Client Not Exitst.")
+	ErrNullBaseEntity     = errors.New("SwitchIn809: BaseEntity is nil.")
 )
 
 type Tcp809Server struct {
@@ -82,11 +88,13 @@ func (trans *Tcp809Server) DownData(rcv model.IEntity) (model.IEntity, error) {
 	var err error
 	baseEntity := rcv.GetEntityBase()
 	if baseEntity == nil {
-		return nil, nil
+		return nil, ErrNullBaseEntity
 	}
 	if val, ok := trans.SubList.GetOk(baseEntity.AccessCode); ok {
 		subcli := val.(*TcpSubClient)
 		err = subcli.DownCmd(rcv)
+	} else {
+		return nil, ErrSubClientNotExitst
 	}
 	return nil, err
 }

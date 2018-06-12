@@ -21,7 +21,7 @@ func (e *DOWN_PLATFORM_MSG_INFO_REQ) GetMsgId() interface{} {
 	return e.MsgId
 }
 func (e *DOWN_PLATFORM_MSG_INFO_REQ) GetEntityBase() *model.EntityBase {
-	return e.GetEntityBase()
+	return e.EntityBase.GetEntityBase()
 }
 
 func (e *DOWN_PLATFORM_MSG_INFO_REQ) GetDBSql() string {

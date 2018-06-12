@@ -3,7 +3,9 @@ package SwitchIn809
 import (
 	"bytes"
 
+	"github.com/axgle/mahonia"
 	"github.com/tiptok/gonat/model"
+	"github.com/tiptok/gonat/model/jtb809/down"
 	"github.com/tiptok/gotransfer/comm"
 )
 
@@ -39,4 +41,21 @@ func (p *JTB809PackerBase) J9005(obj interface{}) (packdata []byte, err error) {
 	//inEntity := obj.(*model.DOWN_LINKTEST_REQ)
 	//buf.Write(comm.BinaryHelper.Int32ToBytes(int(inEntity.VERIFY_CODE)))
 	return buf.Bytes(), nil
+}
+
+/*
+   J9301 从链路连接请求
+*/
+func (p *JTB809PackerBase) J9301(obj interface{}) (packdata []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+	inEntity := obj.(*down.DOWN_PLATFORM_MSG_POST_QUERY_REQ)
+	enc := mahonia.NewDecoder("gbk")
+	gbkdata := comm.BinaryHelper.GetASCIIString(enc.ConvertString(inEntity.INFO_CONTENT))
+
+	buf.Write(gbkdata)
+	//buf.Write(comm.BinaryHelper.Int32ToBytes(int(inEntity.VERIFY_CODE)))
+	return buf.Bytes(), nil
+}
+func getSubCmdCode(sSubCmdCode string) {
+
 }

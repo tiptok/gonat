@@ -17,6 +17,7 @@ type TaskManager struct {
 	Cancel     context.CancelFunc
 	StopFlag   int //1开启 0关闭
 	GSize      int //开启Goroutine 数量
+	CloseOnce  sync.Once
 }
 
 //NewTaskManager 新建一个TaskManager
@@ -32,11 +33,13 @@ func NewTaskManager(name string, bufSize int, gSize int, onExecTask func(interfa
 		OnExecTask: onExecTask,
 		StopFlag:   0,
 		GSize:      gSize,
+		//CloseOnce:       make(sync.Once),
 	}
 }
 
 //Start 启动一个TaskTaskManager
 func (task *TaskManager) Start(ctx context.Context) {
+	task.StopFlag = 1
 	for i := 1; i <= task.GSize; i++ {
 		task.l.Lock()
 		Info(global.F(BUS, "TaskManager", "启动 TaskManager -%v %v"), task.TaskName, i)
@@ -54,6 +57,9 @@ func (task *TaskManager) Count() int {
 
 //Enqueue 入队
 func (task *TaskManager) Enqueue(p interface{}) {
+	if task.StopFlag == 0 {
+		return
+	}
 	task.Queue <- p
 }
 
@@ -64,7 +70,6 @@ func (task *TaskManager) Enqueue(p interface{}) {
 
 //ExecTask 执行任务
 func (task *TaskManager) ExecTask(ctx context.Context) {
-	task.StopFlag = 1
 	for {
 		select {
 		case <-ctx.Done():
@@ -82,7 +87,10 @@ func (task *TaskManager) ExecTask(ctx context.Context) {
 func (task *TaskManager) Stop() {
 	task.l.Lock()
 	defer task.l.Unlock()
+	task.CloseOnce.Do(func() {
+		close(task.Queue)
+		task.StopFlag = 0
+	})
 	//task.Cancel()
-	close(task.Queue)
-	task.StopFlag = 0
+
 }
