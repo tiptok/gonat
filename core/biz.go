@@ -53,6 +53,7 @@ func (b bizBase) DecJSONCmd(sCmd string, cmdData []byte) (model.IEntity, error) 
 //OnRegistCmdEntity  注册cmd实体
 func (b bizBase) OnRegistCmdEntity() {
 	b.RegistCmd(fmt.Sprintf("%d", model.J平台查岗请求), reflect.TypeOf(down.DOWN_PLATFORM_MSG_INFO_REQ{}))
+	b.RegistCmd(fmt.Sprintf("%d", model.J下发平台间报文请求), reflect.TypeOf(down.DOWN_PLATFORM_MSG_INFO_REQ{}))
 }
 func (b bizBase) RegistCmd(sCmd string, t reflect.Type) {
 	b.CmdType.Set(sCmd, t)
