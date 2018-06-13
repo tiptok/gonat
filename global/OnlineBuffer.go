@@ -1,7 +1,6 @@
 package global
 
 import (
-	"github.com/tiptok/GoNas/global"
 	"github.com/tiptok/gotransfer/comm"
 )
 
@@ -11,7 +10,7 @@ type OnlineList struct {
 
 //Login  上线
 func (online *OnlineList) Login(info *VehicleInfo) {
-	Info(global.F(global.BUS, global.Cache, " %v 上线车辆 %v %v"), info.Obj, info.PlateNum, info.SimNum)
+	Info(F(BUS, Cache, " %v 上线车辆 %v %v"), info.Obj, info.PlateNum, info.SimNum)
 	online.List.Set(info.SimNum, info)
 }
 
@@ -27,7 +26,7 @@ func (online *OnlineList) Logout(sKey string) {
 func (online *OnlineList) OnDelete(sKey interface{}, val interface{}) {
 	info := val.(*VehicleInfo)
 	info.SetObj(nil)
-	Info(global.F(global.BUS, global.Cache, " %v 下线车辆 %v %v"), info.Obj, info.PlateNum, info.SimNum)
+	Info(F(BUS, Cache, " %v 下线车辆 %v %v"), info.Obj, info.PlateNum, info.SimNum)
 }
 
 //GetOnline 返回在线车辆

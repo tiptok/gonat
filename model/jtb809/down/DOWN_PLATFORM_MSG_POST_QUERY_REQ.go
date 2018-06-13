@@ -1,6 +1,8 @@
 package down
 
-import "github.com/tiptok/GoNas/model"
+import (
+	"github.com/tiptok/gonat/model"
+)
 
 //DOWN_PLATFORM_MSG_INFO_REQ 下发平台间报文请求 0x9302
 type DOWN_PLATFORM_MSG_POST_QUERY_REQ struct {
@@ -16,7 +18,7 @@ type DOWN_PLATFORM_MSG_POST_QUERY_REQ struct {
 }
 
 func (e *DOWN_PLATFORM_MSG_POST_QUERY_REQ) GetMsgId() interface{} {
-	return e.MsgId
+	return model.J从链路平台间信息交换
 }
 func (e *DOWN_PLATFORM_MSG_POST_QUERY_REQ) GetEntityBase() *model.EntityBase {
 	return e.EntityBase.GetEntityBase()

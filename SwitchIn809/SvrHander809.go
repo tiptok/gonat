@@ -116,9 +116,9 @@ func SendCmdAsync(c *conn.Connector, e model.IEntity) {
 	//IEntity
 	data, err := conn.SendEntity(e, c)
 	if err != nil {
-		global.Error("SvrHander Send Entity Error:%v", err)
+		global.Error(global.F(global.TCP, global.SVR809, " Send Entity Error:%v"), err)
 	} else {
-		global.Debug("SvrHander Send Data:%s", comm.BinaryHelper.ToBCDString(data, 0, int32(len(data))))
+		global.Debug(global.F(global.TCP, global.SVR809, " Send Data:%s"), comm.BinaryHelper.ToBCDString(data, 0, int32(len(data))))
 	}
 }
 

@@ -3,8 +3,6 @@ package global
 import (
 	"context"
 	"sync"
-
-	"github.com/tiptok/GoNas/global"
 )
 
 //TaskManager  任务管理
@@ -42,7 +40,7 @@ func (task *TaskManager) Start(ctx context.Context) {
 	task.StopFlag = 1
 	for i := 1; i <= task.GSize; i++ {
 		task.l.Lock()
-		Info(global.F(BUS, "TaskManager", "启动 TaskManager -%v %v"), task.TaskName, i)
+		Info(F(BUS, "TaskManager", "启动 TaskManager -%v %v"), task.TaskName, i)
 		go task.ExecTask(ctx)
 		task.l.Unlock()
 	}

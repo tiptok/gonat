@@ -44,7 +44,7 @@ func (p *JTB809PackerBase) J9005(obj interface{}) (packdata []byte, err error) {
 }
 
 /*
-   J9301 从链路连接请求
+   J9301 平台查岗请求
 */
 func (p *JTB809PackerBase) J9301(obj interface{}) (packdata []byte, err error) {
 	buf := bytes.NewBuffer(nil)
@@ -52,10 +52,35 @@ func (p *JTB809PackerBase) J9301(obj interface{}) (packdata []byte, err error) {
 	enc := mahonia.NewDecoder("gbk")
 	gbkdata := comm.BinaryHelper.GetASCIIString(enc.ConvertString(inEntity.INFO_CONTENT))
 
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(uint16(0x9301)))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(int(len(gbkdata) + 21)))
+	buf.WriteByte(inEntity.OBJECT_TYPE)
+	buf.Write(comm.BinaryHelper.GetASCIIStringWL(inEntity.OBJECT_ID, 12))
+	buf.Write(comm.BinaryHelper.UInt32ToBytes(uint(inEntity.INFO_ID)))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(int(len(gbkdata))))
 	buf.Write(gbkdata)
-	//buf.Write(comm.BinaryHelper.Int32ToBytes(int(inEntity.VERIFY_CODE)))
 	return buf.Bytes(), nil
 }
-func getSubCmdCode(sSubCmdCode string) {
 
+/*
+   J9302 下发平台间报文请求
+*/
+func (p *JTB809PackerBase) J9302(obj interface{}) (packdata []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+	inEntity := obj.(*down.DOWN_PLATFORM_MSG_INFO_REQ)
+	enc := mahonia.NewDecoder("gbk")
+	gbkdata := comm.BinaryHelper.GetASCIIString(enc.ConvertString(inEntity.INFO_CONTENT))
+
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(uint16(0x9302)))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(int(len(gbkdata) + 21)))
+	buf.WriteByte(inEntity.OBJECT_TYPE)
+	buf.Write(comm.BinaryHelper.GetASCIIStringWL(inEntity.OBJECT_ID, 12))
+	buf.Write(comm.BinaryHelper.UInt32ToBytes(uint(inEntity.INFO_ID)))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(int(len(gbkdata))))
+	buf.Write(gbkdata)
+	return buf.Bytes(), nil
 }
+
+// func getSubCmdCode(sSubCmdCode string)int16,error {
+// 	return strconv.Atoi(sSubCmdCode)
+// }

@@ -2,6 +2,7 @@ package SwitchIn809
 
 import (
 	"log"
+	"runtime/debug"
 
 	"errors"
 
@@ -24,6 +25,7 @@ type protocol809 struct {
 func (p protocol809) PacketMsg(obj interface{}) (data []byte, err error) {
 	defer func() {
 		if p := recover(); p != nil {
+			debug.PrintStack()
 			log.Printf("protocol809.PacketMsg panic recover! p: %v", p)
 		}
 	}()
@@ -35,12 +37,12 @@ func (p protocol809) PacketMsg(obj interface{}) (data []byte, err error) {
 	if def, ok := obj.(model.IEntity); ok {
 		entity := def.GetEntityBase()
 		if packdata != nil && len(packdata) > 0 {
-			global.Debug("MsgId:%X MsgBodyData:%s", entity.GetMsgId().(int), comm.BinaryHelper.ToBCDString(packdata, 0, int32(len(packdata))))
+			global.Debug("MsgId:%X MsgBodyData:%s", def.GetMsgId().(int), comm.BinaryHelper.ToBCDString(packdata, 0, int32(len(packdata))))
 		}
 		buf := bytes.NewBuffer(nil)
-		buf.Write(comm.BinaryHelper.Int32ToBytes(len(packdata) + 26))             //总长度
-		buf.Write(comm.BinaryHelper.Int32ToBytes(entity.MsgSN))                   //流水号
-		buf.Write(comm.BinaryHelper.Int16ToBytes(int16(entity.GetMsgId().(int)))) //消息Id
+		buf.Write(comm.BinaryHelper.Int32ToBytes(len(packdata) + 26))          //总长度
+		buf.Write(comm.BinaryHelper.Int32ToBytes(entity.MsgSN))                //流水号
+		buf.Write(comm.BinaryHelper.Int16ToBytes(int16(def.GetMsgId().(int)))) //消息Id
 		iAccesscode, _ := strconv.Atoi(entity.AccessCode)
 		buf.Write(comm.BinaryHelper.Int32ToBytes(iAccesscode)) //接入码
 		buf.Write([]byte{0x00, 0x01, 0x00})                    //版本号 0.1.0
@@ -65,8 +67,20 @@ func (p protocol809) PacketMsg(obj interface{}) (data []byte, err error) {
 func (p protocol809) Packet(obj interface{}) (packdata []byte, err error) {
 	if def, ok := obj.(model.IEntity); ok {
 		entity := def.GetEntityBase()
-		sMethodName := fmt.Sprintf("J%X", entity.MsgId.(int))
-		//global.Debug("InvokeFunc:%s", sMethodName)
+		var sMethodName string
+		var cmdCode interface{}
+		if entity.SubMsgId == nil {
+			cmdCode = entity.MsgId
+		} else {
+			cmdCode = entity.SubMsgId
+		}
+		icmdCode, err := strconv.Atoi(fmt.Sprintf("%v", cmdCode))
+		if err != nil {
+			return nil, err
+			//return nil, fmt.Errorf("Packet:cmdCode type is not int %v %v", cmdCode, reflect.TypeOf(cmdCode))
+		}
+		sMethodName = fmt.Sprintf("J%X", icmdCode)
+		global.Debug("InvokeFunc:%s", sMethodName)
 		value, err := comm.ParseHelper.InvokeFunc(&JTB809PackerBase{}, sMethodName, obj)
 		if err == nil {
 			packdata = (value[0].Interface()).([]byte)

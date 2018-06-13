@@ -18,7 +18,7 @@ type DOWN_PLATFORM_MSG_INFO_REQ struct {
 }
 
 func (e *DOWN_PLATFORM_MSG_INFO_REQ) GetMsgId() interface{} {
-	return e.MsgId
+	return model.J从链路平台间信息交换
 }
 func (e *DOWN_PLATFORM_MSG_INFO_REQ) GetEntityBase() *model.EntityBase {
 	return e.EntityBase.GetEntityBase()

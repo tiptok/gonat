@@ -45,17 +45,22 @@ func (b bizBase) DecJSONCmd(sCmd string, cmdData []byte) (model.IEntity, error) 
 		if err != nil {
 			return nil, err
 		}
-		return instance.(model.IEntity), nil
+		e, ok := instance.(model.IEntity)
+		if !ok {
+			return nil, fmt.Errorf("%v cannot convert to model.IEntity", reflect.TypeOf(instance))
+		}
+		return e, nil
 	}
 	return nil, fmt.Errorf("DecJsonCmd Not Exists %v", sCmd)
 }
 
 //OnRegistCmdEntity  注册cmd实体
 func (b bizBase) OnRegistCmdEntity() {
-	b.RegistCmd(fmt.Sprintf("%d", model.J平台查岗请求), reflect.TypeOf(down.DOWN_PLATFORM_MSG_INFO_REQ{}))
-	b.RegistCmd(fmt.Sprintf("%d", model.J下发平台间报文请求), reflect.TypeOf(down.DOWN_PLATFORM_MSG_INFO_REQ{}))
+	b.RegistCmd(model.J平台查岗请求, reflect.TypeOf(down.DOWN_PLATFORM_MSG_POST_QUERY_REQ{}))
+	b.RegistCmd(model.J下发平台间报文请求, reflect.TypeOf(down.DOWN_PLATFORM_MSG_INFO_REQ{}))
 }
-func (b bizBase) RegistCmd(sCmd string, t reflect.Type) {
+func (b bizBase) RegistCmd(iCmd int, t reflect.Type) {
+	sCmd := fmt.Sprintf("%d", iCmd)
 	b.CmdType.Set(sCmd, t)
 }
 
@@ -131,12 +136,13 @@ func (b *BizDBTdf) ReceiveEntity() (interface{}, error) {
 		if index == 0 {
 			b.cmdLRTime = cmdParam.SendTime.Add(1 * time.Second)
 		}
-		entity, err := b.DecCmd("json", cmdParam.CmdCode, []byte(cmdParam.ParamContent))
+		global.Debug(global.F(global.Biz, global.DOWNDATA, "Send Cmd %v:%v SendTime:%v"), cmdParam.CmdCode, string(cmdParam.ParamContent), cmdParam.SendTime.Format("2006-01-02 15:04:05"))
+		entity, err := b.DecCmd("json", cmdParam.CmdCode, cmdParam.ParamContent)
 		if err != nil || entity == nil {
 			global.Error(global.F(global.Biz, global.DOWNDATA, "ReceiveEntity DecCmd.%v"), err)
+			index++
 			continue
 		}
-		global.Debug(global.F(global.Biz, global.DOWNDATA, "Send Cmd %v:%v SendTime:%v"), cmdParam.CmdCode, cmdParam.ParamContent, cmdParam.SendTime.Format("2006-01-02 15:04:05"))
 		b.TaskRec.Enqueue(entity)
 		index++
 	}
@@ -177,7 +183,7 @@ type cmdParamEx struct {
 	SimNum       string
 	UserID       string
 	CmdCode      string
-	ParamContent string
+	ParamContent []byte
 	SendTime     time.Time
 	CmdCodeFlag  string
 }
