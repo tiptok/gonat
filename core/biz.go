@@ -11,6 +11,7 @@ import (
 
 	"time"
 
+	"github.com/axgle/mahonia"
 	"github.com/tiptok/gonat/global"
 	"github.com/tiptok/gonat/model"
 	"github.com/tiptok/gonat/model/jtb809/down"
@@ -136,8 +137,10 @@ func (b *BizDBTdf) ReceiveEntity() (interface{}, error) {
 		if index == 0 {
 			b.cmdLRTime = cmdParam.SendTime.Add(1 * time.Second)
 		}
-		global.Debug(global.F(global.Biz, global.DOWNDATA, "Send Cmd %v:%v SendTime:%v"), cmdParam.CmdCode, string(cmdParam.ParamContent), cmdParam.SendTime.Format("2006-01-02 15:04:05"))
-		entity, err := b.DecCmd("json", cmdParam.CmdCode, cmdParam.ParamContent)
+		enc := mahonia.NewDecoder("gbk")
+		cmdParam.ParamContent = enc.ConvertString(cmdParam.ParamContent)
+		entity, err := b.DecCmd("json", cmdParam.CmdCode, []byte(cmdParam.ParamContent))
+		global.Debug(global.F(global.Biz, global.DOWNDATA, "Send Cmd %x:%v SendTime:%v  %v"), comm.UnityToolHelper.ConvertToInt(cmdParam.CmdCode), string(cmdParam.ParamContent), cmdParam.SendTime.Format("2006-01-02 15:04:05"), entity)
 		if err != nil || entity == nil {
 			global.Error(global.F(global.Biz, global.DOWNDATA, "ReceiveEntity DecCmd.%v"), err)
 			index++
@@ -183,7 +186,7 @@ type cmdParamEx struct {
 	SimNum       string
 	UserID       string
 	CmdCode      string
-	ParamContent []byte
+	ParamContent string
 	SendTime     time.Time
 	CmdCodeFlag  string
 }

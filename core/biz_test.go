@@ -54,8 +54,21 @@ func checkCmdJson(obj interface{}) {
 }
 
 func TestEncodeGbk(t *testing.T) {
-	enc := mahonia.NewDecoder("gbk")
-	data := enc.ConvertString("你好")
-	log.Printf(data)
-	log.Printf("%v", []byte("你好"))
+	//"你好，世界！"的GBK编码
+	testBytes := []byte{0xC4, 0xE3, 0xBA, 0xC3, 0xA3, 0xAC, 0xCA, 0xC0, 0xBD, 0xE7, 0xA3, 0xA1}
+	var testStr string
+	utfStr := "你好，世界！"
+	var dec mahonia.Decoder
+	var enc mahonia.Encoder
+
+	testStr = string(testBytes)
+
+	dec = mahonia.NewDecoder("gbk")
+	fmt.Println("GBK", []byte(utfStr))
+	ret := dec.ConvertString(testStr)
+	fmt.Println("GBK to UTF-8: ", ret, " bytes:", testBytes)
+
+	enc = mahonia.NewEncoder("gbk")
+	ret = enc.ConvertString(utfStr)
+	fmt.Println("UTF-8 to GBK: ", ret, " bytes: ", []byte(ret))
 }

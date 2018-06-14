@@ -7,6 +7,7 @@ import (
 
 	"github.com/axgle/mahonia"
 	"github.com/tiptok/gonat/model"
+	"github.com/tiptok/gonat/model/jtb809/up"
 	"github.com/tiptok/gotransfer/comm"
 )
 
@@ -138,4 +139,42 @@ func GetGetLoactionInfo(msgBody []byte, iIndex int32) (location model.LocationIn
 	location.STATE = int(comm.BinaryHelper.ToInt32(msgBody, iIndex+27))
 	location.ALARM = int(comm.BinaryHelper.ToInt32(msgBody, iIndex+31))
 	return location
+}
+
+//J1200 主链路动态信息交换
+func (p *JTB809ParseBase) J1300(msgBody []byte, h model.EntityBase) interface{} {
+	outEntity := model.EntityBase{}
+	outEntity.SetEntity(h)
+	outEntity.SubMsgId = comm.BinaryHelper.ToUInt16(msgBody, 0)
+	switch outEntity.SubMsgId.(uint16) {
+	case 0x1301:
+		return J1301(msgBody, outEntity)
+	case 0x1302:
+		return J1302(msgBody, outEntity)
+	default:
+		panic(fmt.Sprintf("未找到对应方法:%v", outEntity.SubMsgId))
+	}
+	return nil
+}
+
+func J1301(msgBody []byte, h model.EntityBase) interface{} {
+	outEntity := &up.UP_PLATFORM_MSG_POST_QUERY_ACK{
+		EntityBase: h,
+	}
+	//length := comm.BinaryHelper.ToInt32(msgBody, 2)
+	outEntity.OBJECT_TYPE = msgBody[6] //报警信息来源
+	outEntity.OBJECT_ID = comm.BinaryHelper.ToASCIIString(msgBody, 7, 12)
+	outEntity.INFO_ID = comm.BinaryHelper.ToInt32(msgBody, 19)
+	dec := mahonia.NewDecoder("gbk")
+	lenContent := comm.BinaryHelper.ToInt32(msgBody, 23)
+	outEntity.INFO_CONTENT = dec.ConvertString(string(msgBody[23 : 23+lenContent]))
+	return outEntity
+}
+func J1302(msgBody []byte, h model.EntityBase) interface{} {
+	outEntity := &up.UP_PLATFORM_MSG_INFO_ACK{
+		EntityBase: h,
+	}
+	//4
+	outEntity.INFO_ID = comm.BinaryHelper.ToInt32(msgBody, 6)
+	return outEntity
 }

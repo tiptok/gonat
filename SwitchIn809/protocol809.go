@@ -146,6 +146,9 @@ func (p protocol809) Parse(packdata []byte) (obj interface{}, err error) {
 	//InvokeFunc
 	//log.Println(msgBodyLenght, sMethodName, comm.BinaryHelper.ToBCDString(msgBody, 0, int32(len(msgBody))))
 	value, err := comm.ParseHelper.InvokeFunc(&JTB809ParseBase{}, sMethodName, msgBody, h)
+	if err != nil {
+		return nil, err
+	}
 	if value != nil && len(value) > 0 {
 		obj = value[0].Interface()
 	}

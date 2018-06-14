@@ -49,9 +49,8 @@ func (p *JTB809PackerBase) J9005(obj interface{}) (packdata []byte, err error) {
 func (p *JTB809PackerBase) J9301(obj interface{}) (packdata []byte, err error) {
 	buf := bytes.NewBuffer(nil)
 	inEntity := obj.(*down.DOWN_PLATFORM_MSG_POST_QUERY_REQ)
-	enc := mahonia.NewDecoder("gbk")
+	enc := mahonia.NewEncoder("gbk")
 	gbkdata := comm.BinaryHelper.GetASCIIString(enc.ConvertString(inEntity.INFO_CONTENT))
-
 	buf.Write(comm.BinaryHelper.UInt16ToBytes(uint16(0x9301)))
 	buf.Write(comm.BinaryHelper.Int32ToBytes(int(len(gbkdata) + 21)))
 	buf.WriteByte(inEntity.OBJECT_TYPE)
@@ -68,7 +67,7 @@ func (p *JTB809PackerBase) J9301(obj interface{}) (packdata []byte, err error) {
 func (p *JTB809PackerBase) J9302(obj interface{}) (packdata []byte, err error) {
 	buf := bytes.NewBuffer(nil)
 	inEntity := obj.(*down.DOWN_PLATFORM_MSG_INFO_REQ)
-	enc := mahonia.NewDecoder("gbk")
+	enc := mahonia.NewEncoder("gbk")
 	gbkdata := comm.BinaryHelper.GetASCIIString(enc.ConvertString(inEntity.INFO_CONTENT))
 
 	buf.Write(comm.BinaryHelper.UInt16ToBytes(uint16(0x9302)))
