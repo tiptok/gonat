@@ -178,3 +178,52 @@ func J1302(msgBody []byte, h model.EntityBase) interface{} {
 	outEntity.INFO_ID = comm.BinaryHelper.ToInt32(msgBody, 6)
 	return outEntity
 }
+
+//J1500 主链路车辆监管
+func (p *JTB809ParseBase) J1500(msgBody []byte, h model.EntityBase) interface{} {
+	outEntity := up.UP_CTRL_MSG{}
+	outEntity.SetEntity(h)
+	outEntity.SubMsgId = comm.BinaryHelper.ToUInt16(msgBody, 0)
+	dec := mahonia.NewDecoder("gbk")
+	outEntity.Vehicle_No = strings.Trim(comm.BinaryHelper.ToASCIIString(msgBody, 0, 21), string([]byte{0x00})) // strings.Trim(comm.BinaryHelper.ToASCIIString(msgBody, 0, 21), " ")
+	outEntity.Vehicle_No = dec.ConvertString(outEntity.Vehicle_No)
+	outEntity.Vehicle_Color = msgBody[21]
+	switch outEntity.SubMsgId.(uint16) {
+	case 0x1501:
+		return J1501(msgBody, outEntity)
+	// case 0x1502:
+	// 	return J1502(msgBody, outEntity)
+	default:
+		panic(fmt.Sprintf("未找到对应方法:%v", outEntity.SubMsgId))
+	}
+	return nil
+}
+
+//J1501 车辆单向监听应答
+func J1501(msgBody []byte, h up.UP_CTRL_MSG) interface{} {
+	outEntity := &up.UP_CTRL_MSG_MONITOR_VEHICLE_ACK{
+		EntityBase:    h.EntityBase,
+		Vehicle_No:    h.Vehicle_No,
+		Vehicle_Color: h.Vehicle_Color,
+	}
+	//lenght 4
+	outEntity.RESULT = msgBody[28]
+	return outEntity
+}
+
+//J1502 车辆拍照应答
+func J1502(msgBody []byte, h up.UP_CTRL_MSG) interface{} {
+	outEntity := &up.UP_CTRL_MSG_TAKE_PHOTO_ACK{
+		EntityBase:    h.EntityBase,
+		Vehicle_No:    h.Vehicle_No,
+		Vehicle_Color: h.Vehicle_Color,
+	}
+	//lenght 4
+	outEntity.PHOTO_RSP_FLAG = msgBody[28]
+	outEntity.GNSS_DATA = GetGetLoactionInfo(msgBody, 29)
+	outEntity.LENS_ID = msgBody[65]
+	lenPhoto := comm.BinaryHelper.ToInt32(msgBody, 66)
+	outEntity.TYPE = msgBody[70]
+	outEntity.PHOTO = msgBody[71 : 71+lenPhoto-1]
+	return outEntity
+}

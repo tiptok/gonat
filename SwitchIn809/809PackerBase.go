@@ -83,3 +83,98 @@ func (p *JTB809PackerBase) J9302(obj interface{}) (packdata []byte, err error) {
 // func getSubCmdCode(sSubCmdCode string)int16,error {
 // 	return strconv.Atoi(sSubCmdCode)
 // }
+
+/*
+   J9501 车辆单向监听请求
+*/
+func (p *JTB809PackerBase) J9501(obj interface{}) (packdata []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+	inEntity := obj.(*down.DOWN_CTRL_MSG_MONITOR_VEHICLE_REQ)
+	enc := mahonia.NewEncoder("gbk")
+	gbkdata := comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.Vehicle_No), 21)
+
+	buf.Write(gbkdata)
+	buf.WriteByte(inEntity.Vehicle_Color)
+	buf.Write(comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.MONITOR_TEL), 20))
+	return buf.Bytes(), nil
+}
+
+/*
+   J9502 车辆拍照请求
+*/
+func (p *JTB809PackerBase) J9502(obj interface{}) (packdata []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+	inEntity := obj.(*down.DOWN_CTRL_MSG_TAKE_PHOTO_REQ)
+	enc := mahonia.NewEncoder("gbk")
+	gbkdata := comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.Vehicle_No), 21)
+
+	buf.Write(gbkdata)
+	buf.WriteByte(inEntity.Vehicle_Color)
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(0x9502))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(0x02))
+	buf.WriteByte(inEntity.LENS_ID)
+	buf.WriteByte(inEntity.SIZE)
+	return buf.Bytes(), nil
+}
+
+/*
+   J9503 下发平台间报文请求
+*/
+func (p *JTB809PackerBase) J9503(obj interface{}) (packdata []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+	inEntity := obj.(*down.DOWN_CTRL_MSG_TEXT_INFO)
+	enc := mahonia.NewEncoder("gbk")
+	plateNum := comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.Vehicle_No), 21)
+	content := comm.BinaryHelper.GetASCIIString(enc.ConvertString(inEntity.MSG_CONTENT))
+
+	buf.Write(plateNum)
+	buf.WriteByte(inEntity.Vehicle_Color)
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(0x9503))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(inEntity.MSG_SEQUENCE))
+	buf.WriteByte(inEntity.MSG_PRIORITY)
+	buf.Write(comm.BinaryHelper.Int32ToBytes(len(content)))
+	buf.Write(content)
+	return buf.Bytes(), nil
+}
+
+/*
+   J9504 上报车辆行驶记录请求
+*/
+func (p *JTB809PackerBase) J9504(obj interface{}) (packdata []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+	inEntity := obj.(*down.DOWN_CTRL_MSG_TAKE_TRAVEL_REQ)
+	enc := mahonia.NewEncoder("gbk")
+	plateNum := comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.Vehicle_No), 21)
+
+	buf.Write(plateNum)
+	buf.WriteByte(inEntity.Vehicle_Color)
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(0x9504))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(1))
+	buf.WriteByte(inEntity.COMMAND_TYPE)
+	return buf.Bytes(), nil
+}
+
+/*
+   J9505 车辆应急接入监管平台请求
+*/
+func (p *JTB809PackerBase) J9505(obj interface{}) (packdata []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+	inEntity := obj.(*down.DOWN_CTRL_MSG_EMERGENCY_MONITORYING_REQ)
+	enc := mahonia.NewEncoder("gbk")
+	plateNum := comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.Vehicle_No), 21)
+
+	buf.Write(plateNum)
+	buf.WriteByte(inEntity.Vehicle_Color)
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(0x9505))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(145))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(145))
+	buf.Write(comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.AUTHENTICATION_CODE), 10))
+	buf.Write(comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.ACCESS_POINT_NAME), 20))
+	buf.Write(comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.USERNAME), 49))
+	buf.Write(comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.PASSWORD), 22))
+	buf.Write(comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.SERVER_IP), 32))
+	buf.Write(comm.BinaryHelper.Int16ToBytes(inEntity.TCP_PORT))
+	buf.Write(comm.BinaryHelper.Int16ToBytes(inEntity.UDP_PORT))
+	buf.Write(comm.BinaryHelper.Int64ToBytes(inEntity.END_TIME.Unix())) //TODO:UTC时间
+	return buf.Bytes(), nil
+}
