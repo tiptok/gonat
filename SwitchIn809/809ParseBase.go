@@ -227,3 +227,42 @@ func J1502(msgBody []byte, h up.UP_CTRL_MSG) interface{} {
 	outEntity.PHOTO = msgBody[71 : 71+lenPhoto-1]
 	return outEntity
 }
+
+//J1503 下发车辆报文应答
+func J1503(msgBody []byte, h up.UP_CTRL_MSG) interface{} {
+	outEntity := &up.UP_CTRL_MSG_TEXT_INFO_ACK{
+		EntityBase:    h.EntityBase,
+		Vehicle_No:    h.Vehicle_No,
+		Vehicle_Color: h.Vehicle_Color,
+	}
+	//lenght 4
+	outEntity.MSG_ID = comm.BinaryHelper.ToUInt32(msgBody, 28)
+	outEntity.RESULT = msgBody[32]
+	return outEntity
+}
+
+//J1504 上报车辆行驶记录应答
+func J1504(msgBody []byte, h up.UP_CTRL_MSG) interface{} {
+	outEntity := &up.UP_CTRL_MSG_TAKE_TRAVEL_ACK{
+		EntityBase:    h.EntityBase,
+		Vehicle_No:    h.Vehicle_No,
+		Vehicle_Color: h.Vehicle_Color,
+	}
+	//lenght 4
+	lenData := comm.BinaryHelper.ToInt32(msgBody, 32)
+	outEntity.TRAVELDATA_INFO = comm.BinaryHelper.ToBCDString(msgBody, 36, lenData)
+	return outEntity
+}
+
+//J1505  车辆应急接入督管平台应答
+func J1505(msgBody []byte, h up.UP_CTRL_MSG) interface{} {
+	outEntity := &up.UP_CTRL_MSG_EMERGENCY_MONITORING_ACK{
+		EntityBase:    h.EntityBase,
+		Vehicle_No:    h.Vehicle_No,
+		Vehicle_Color: h.Vehicle_Color,
+	}
+	//lenght 4
+	//outEntity.MSG_ID = comm.BinaryHelper.ToUInt32(msgBody, 28)
+	outEntity.RESULT = msgBody[28]
+	return outEntity
+}
