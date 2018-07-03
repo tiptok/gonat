@@ -59,6 +59,12 @@ func (b bizBase) DecJSONCmd(sCmd string, cmdData []byte) (model.IEntity, error) 
 func (b bizBase) OnRegistCmdEntity() {
 	b.RegistCmd(model.J平台查岗请求, reflect.TypeOf(down.DOWN_PLATFORM_MSG_POST_QUERY_REQ{}))
 	b.RegistCmd(model.J下发平台间报文请求, reflect.TypeOf(down.DOWN_PLATFORM_MSG_INFO_REQ{}))
+	//9500
+	b.RegistCmd(model.J车辆单向监听请求, reflect.TypeOf(down.DOWN_CTRL_MSG_MONITOR_VEHICLE_REQ{}))
+	b.RegistCmd(model.J车辆拍照请求, reflect.TypeOf(down.DOWN_CTRL_MSG_TAKE_PHOTO_REQ{}))
+	b.RegistCmd(model.J下发车辆报文请求, reflect.TypeOf(down.DOWN_CTRL_MSG_TEXT_INFO{}))
+	b.RegistCmd(model.J上报车辆行驶记录请求, reflect.TypeOf(down.DOWN_CTRL_MSG_TAKE_TRAVEL_REQ{}))
+	b.RegistCmd(model.J车辆应急接入监管平台请求, reflect.TypeOf(down.DOWN_CTRL_MSG_EMERGENCY_MONITORYING_REQ{}))
 }
 func (b bizBase) RegistCmd(iCmd int, t reflect.Type) {
 	sCmd := fmt.Sprintf("%d", iCmd)

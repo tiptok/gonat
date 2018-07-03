@@ -11,3 +11,14 @@ type DOWN_CTRL_MSG_TAKE_TRAVEL_REQ struct {
 	Vehicle_Color byte   //车牌颜色
 	COMMAND_TYPE  byte   //命令字
 }
+
+func (e *DOWN_CTRL_MSG_TAKE_TRAVEL_REQ) GetMsgId() interface{} {
+	return model.J从链路车辆监管
+}
+func (e *DOWN_CTRL_MSG_TAKE_TRAVEL_REQ) GetEntityBase() *model.EntityBase {
+	return e.EntityBase.GetEntityBase()
+}
+
+func (e *DOWN_CTRL_MSG_TAKE_TRAVEL_REQ) GetDBSql() string {
+	return ""
+}

@@ -65,6 +65,11 @@ func (p protocol809) PacketMsg(obj interface{}) (data []byte, err error) {
 	obj 数据体
 */
 func (p protocol809) Packet(obj interface{}) (packdata []byte, err error) {
+	defer func() {
+		if p := recover(); p != nil {
+			log.Printf("protocol809.Packet panic recover! p: %v", p)
+		}
+	}()
 	if def, ok := obj.(model.IEntity); ok {
 		entity := def.GetEntityBase()
 		var sMethodName string

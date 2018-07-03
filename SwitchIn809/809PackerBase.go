@@ -95,6 +95,8 @@ func (p *JTB809PackerBase) J9501(obj interface{}) (packdata []byte, err error) {
 
 	buf.Write(gbkdata)
 	buf.WriteByte(inEntity.Vehicle_Color)
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(uint16(0x9501)))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(int(20)))
 	buf.Write(comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.MONITOR_TEL), 20))
 	return buf.Bytes(), nil
 }
@@ -130,6 +132,7 @@ func (p *JTB809PackerBase) J9503(obj interface{}) (packdata []byte, err error) {
 	buf.Write(plateNum)
 	buf.WriteByte(inEntity.Vehicle_Color)
 	buf.Write(comm.BinaryHelper.UInt16ToBytes(0x9503))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(int(len(content) + 9)))
 	buf.Write(comm.BinaryHelper.Int32ToBytes(inEntity.MSG_SEQUENCE))
 	buf.WriteByte(inEntity.MSG_PRIORITY)
 	buf.Write(comm.BinaryHelper.Int32ToBytes(len(content)))

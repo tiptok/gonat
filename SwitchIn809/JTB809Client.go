@@ -48,6 +48,12 @@ func NewTcpSubClient(login *model.UP_CONNECT_REQ, svr *Tcp809Server) *TcpSubClie
 	subCli.Client.Config.IsParsePartMsg = true //进行分包
 	subCli.Client.Start(subCli)
 	subCli.HeartTimerWork.Start() //启动定时
+
+	//企业信息
+	obj := global.PInfoCahce.GetCache(subCli.AccessCode)
+	if obj != nil {
+		subCli.PlatInfo = obj.(*global.MSPlatformInfo)
+	}
 	return subCli
 }
 
@@ -156,9 +162,14 @@ func (trans *TcpSubClient) OnReceive(c *conn.Connector, d conn.TcpData) bool {
 
 //DownCmd 下发指令
 func (trans *TcpSubClient) DownCmd(rcv model.IEntity) error {
+	defer func() {
+		if p := recover(); p != nil {
+			log.Printf("SubClient DownCmd panic recover! p: %v", p)
+		}
+	}()
 	if trans.IsLogin {
 		SendCmdAsync(trans.Client.Conn, rcv)
-		global.Debug(global.F(global.TCP, global.SUB809, "%v 发送指令到终端"), trans.String())
+		global.Debug(global.F(global.TCP, global.SUB809, "%v 发送指令到终端 %v"), trans.String(), rcv)
 	} else {
 		return errors.New(fmt.Sprintf("%v 未登录,无连接", trans.String()))
 	}
@@ -176,5 +187,6 @@ func (trans *TcpSubClient) Stop() {
 }
 
 func (trans *TcpSubClient) String() string {
-	return fmt.Sprintf("IP:%v 接入码:%v 运营商名称:%v 登录账号:%v", trans.Client.Conn.RemoteAddress, trans.AccessCode, trans.PlatInfo.CompanyName, trans.PlatInfo.UserId)
+	//return fmt.Sprintf("IP:%v 接入码:%v 运营商名称:%v 登录账号:%v", trans.Client.Conn.RemoteAddress, trans.AccessCode, trans.PlatInfo.CompanyName, trans.PlatInfo.UserId)
+	return fmt.Sprintf("IP:%v 接入码:%v ", trans.Client.Conn.RemoteAddress, trans.AccessCode)
 }

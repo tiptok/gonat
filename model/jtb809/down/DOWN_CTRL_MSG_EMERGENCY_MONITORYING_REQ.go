@@ -20,3 +20,14 @@ type DOWN_CTRL_MSG_EMERGENCY_MONITORYING_REQ struct {
 	UDP_PORT            int16     //服务器 UDP端口
 	END_TIME            time.Time //结束时间
 }
+
+func (e *DOWN_CTRL_MSG_EMERGENCY_MONITORYING_REQ) GetMsgId() interface{} {
+	return model.J从链路车辆监管
+}
+func (e *DOWN_CTRL_MSG_EMERGENCY_MONITORYING_REQ) GetEntityBase() *model.EntityBase {
+	return e.EntityBase.GetEntityBase()
+}
+
+func (e *DOWN_CTRL_MSG_EMERGENCY_MONITORYING_REQ) GetDBSql() string {
+	return ""
+}

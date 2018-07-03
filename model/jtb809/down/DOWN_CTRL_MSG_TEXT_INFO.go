@@ -14,3 +14,14 @@ type DOWN_CTRL_MSG_TEXT_INFO struct {
 	MSG_LENGTH    int    //报文信息长度
 	MSG_CONTENT   string //报文信息内容
 }
+
+func (e *DOWN_CTRL_MSG_TEXT_INFO) GetMsgId() interface{} {
+	return model.J从链路车辆监管
+}
+func (e *DOWN_CTRL_MSG_TEXT_INFO) GetEntityBase() *model.EntityBase {
+	return e.EntityBase.GetEntityBase()
+}
+
+func (e *DOWN_CTRL_MSG_TEXT_INFO) GetDBSql() string {
+	return ""
+}
