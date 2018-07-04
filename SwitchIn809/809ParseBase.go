@@ -85,6 +85,8 @@ func (p *JTB809ParseBase) J1200(msgBody []byte, h model.EntityBase) interface{} 
 	outEntity.Vehicle_Color = msgBody[21]
 	outEntity.SubMsgId = comm.BinaryHelper.ToUInt16(msgBody, 22)
 	switch outEntity.SubMsgId.(uint16) {
+	case 0x1201:
+		return J1201(msgBody, outEntity)
 	case 0x1202:
 		return J1202(msgBody, outEntity)
 	case 0x1203:
@@ -93,6 +95,13 @@ func (p *JTB809ParseBase) J1200(msgBody []byte, h model.EntityBase) interface{} 
 		panic(fmt.Sprintf("未找到对应方法:%v", outEntity.SubMsgId))
 	}
 	return nil
+}
+func J1201(msgBody []byte, h model.UP_EXG_MSG) interface{} {
+	outEntity := &up.UP_EXG_MSG_REGISTER{
+		UP_EXG_MSG: h,
+	}
+
+	return outEntity
 }
 func J1202(msgBody []byte, h model.UP_EXG_MSG) interface{} {
 	outEntity := &model.UP_EXG_MSG_REAL_LOCATION{

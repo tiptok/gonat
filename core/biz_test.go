@@ -7,9 +7,12 @@ import (
 
 	"encoding/json"
 
+	"time"
+
 	"github.com/axgle/mahonia"
 	"github.com/tiptok/gonat/model"
 	"github.com/tiptok/gonat/model/jtb809/down"
+	"github.com/tiptok/gotransfer/comm"
 )
 
 func TestBizDBTdf(t *testing.T) {
@@ -72,6 +75,27 @@ func TestEncodeGbk(t *testing.T) {
 	enc = mahonia.NewEncoder("gbk")
 	ret = enc.ConvertString(utfStr)
 	fmt.Println("UTF-8 to GBK: ", ret, " bytes: ", []byte(ret))
+}
+func Test9401(t *testing.T) {
+	obj := down.DOWN_WARN_MSG_URGE_TODO_REQ{
+		EntityBase: model.EntityBase{
+			MsgId:      "38144",
+			AccessCode: "12345678",
+			SubMsgId:   "38145",
+		},
+		Vehicle_No:          "闽B00000",
+		Vehicle_Color:       2,
+		WARN_TIME:           time.Now(),
+		SUPERVISION_ENDTIME: time.Now(),
+	}
+	utc := obj.WARN_TIME.Unix()
+	fmt.Println(utc)
+	fmt.Println(comm.BinaryHelper.UInt64ToBytes(uint64(utc)))
+	data, err := json.Marshal(obj)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Printf("Deccmd :%s", string(data))
 }
 
 //车辆单向监听9501

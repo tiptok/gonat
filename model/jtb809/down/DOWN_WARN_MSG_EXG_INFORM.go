@@ -16,3 +16,14 @@ type DOWN_WARN_MSG_EXG_INFORM struct {
 	WARN_TYPE     int64     //报警类型
 	WARN_CONTENT  string    //报警描述
 }
+
+func (e *DOWN_WARN_MSG_EXG_INFORM) GetMsgId() interface{} {
+	return model.J从链路报警信息交互
+}
+func (e *DOWN_WARN_MSG_EXG_INFORM) GetEntityBase() *model.EntityBase {
+	return e.EntityBase.GetEntityBase()
+}
+
+func (e *DOWN_WARN_MSG_EXG_INFORM) GetDBSql() string {
+	return ""
+}

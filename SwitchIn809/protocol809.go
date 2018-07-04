@@ -88,6 +88,9 @@ func (p protocol809) Packet(obj interface{}) (packdata []byte, err error) {
 		global.Debug("InvokeFunc:%s", sMethodName)
 		value, err := comm.ParseHelper.InvokeFunc(&JTB809PackerBase{}, sMethodName, obj)
 		if err == nil {
+			// if value == nil || len(value) == 0 {
+			// 	return nil,errors.New("protocol809.Packet:not pakcage return from 809PackerBase.")
+			// }
 			packdata = (value[0].Interface()).([]byte)
 		} else {
 			return nil, err

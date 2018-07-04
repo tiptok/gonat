@@ -80,6 +80,73 @@ func (p *JTB809PackerBase) J9302(obj interface{}) (packdata []byte, err error) {
 	return buf.Bytes(), nil
 }
 
+/*
+   J9401 报警督办请求
+*/
+func (p *JTB809PackerBase) J9401(obj interface{}) (packdata []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+	inEntity := obj.(*down.DOWN_WARN_MSG_URGE_TODO_REQ)
+	enc := mahonia.NewEncoder("gbk")
+	gbkdata := comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.Vehicle_No), 21)
+	supervisor := comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.SUPERVISIOR), 16)
+	buf.Write(gbkdata)
+	buf.WriteByte(inEntity.Vehicle_Color)
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(uint16(0x9401)))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(int(92)))
+	buf.WriteByte(inEntity.WARN_SRC)
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(uint16(inEntity.WARN_TYPE)))
+	buf.Write(comm.BinaryHelper.Int64ToBytes(inEntity.WARN_TIME.Unix() - 8*3600))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(int(inEntity.SUPERVISION_ID)))
+	buf.Write(comm.BinaryHelper.Int64ToBytes(inEntity.SUPERVISION_ENDTIME.Unix() - 8*3600))
+	buf.WriteByte(inEntity.SUPERVISION_LEVEL)
+	buf.Write(supervisor)
+	buf.Write(comm.BinaryHelper.GetASCIIStringWL(inEntity.SUPERVISIOR_TEL, 20))
+	buf.Write(comm.BinaryHelper.GetASCIIStringWL(inEntity.SUPERVISIOR_EMAIL, 32))
+	return buf.Bytes(), nil
+}
+
+/*
+   J9402 实时交换报警信息
+*/
+func (p *JTB809PackerBase) J9402(obj interface{}) (packdata []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+	inEntity := obj.(*down.DOWN_WARN_MSG_INFORM_TIPS)
+	enc := mahonia.NewEncoder("gbk")
+	gbkdata := comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.Vehicle_No), 21)
+	warnContent := comm.BinaryHelper.GetASCIIString(enc.ConvertString(inEntity.WARN_CONTENT))
+	buf.Write(gbkdata)
+	buf.WriteByte(inEntity.Vehicle_Color)
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(uint16(0x9402)))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(int(15 + len(warnContent))))
+	buf.WriteByte(inEntity.WARN_SRC)
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(uint16(inEntity.WARN_TYPE)))
+	buf.Write(comm.BinaryHelper.Int64ToBytes(int64(inEntity.WARN_TIME.Unix() - 8*3600)))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(int(len(warnContent))))
+	buf.Write(warnContent)
+	return buf.Bytes(), nil
+}
+
+/*
+   J9403 实时交换报警信息
+*/
+func (p *JTB809PackerBase) J9403(obj interface{}) (packdata []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+	inEntity := obj.(*down.DOWN_WARN_MSG_EXG_INFORM)
+	enc := mahonia.NewEncoder("gbk")
+	gbkdata := comm.BinaryHelper.GetASCIIStringWL(enc.ConvertString(inEntity.Vehicle_No), 21)
+	warnContent := comm.BinaryHelper.GetASCIIString(enc.ConvertString(inEntity.WARN_CONTENT))
+	buf.Write(gbkdata)
+	buf.WriteByte(inEntity.Vehicle_Color)
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(uint16(0x9403)))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(int(15 + len(warnContent))))
+	buf.WriteByte(inEntity.WARN_SRC)
+	buf.Write(comm.BinaryHelper.UInt16ToBytes(uint16(inEntity.WARN_TYPE)))
+	buf.Write(comm.BinaryHelper.Int64ToBytes(int64(inEntity.WARN_TIME.Unix() - 8*3600)))
+	buf.Write(comm.BinaryHelper.Int32ToBytes(int(len(warnContent))))
+	buf.Write(warnContent)
+	return buf.Bytes(), nil
+}
+
 // func getSubCmdCode(sSubCmdCode string)int16,error {
 // 	return strconv.Atoi(sSubCmdCode)
 // }

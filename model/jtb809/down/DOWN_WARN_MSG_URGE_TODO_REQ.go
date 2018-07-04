@@ -22,3 +22,14 @@ type DOWN_WARN_MSG_URGE_TODO_REQ struct {
 	WARN_CONTENT        string    //报警描述
 	SUPERVISIOR_EMAIL   string    //督办联系电子邮件
 }
+
+func (e *DOWN_WARN_MSG_URGE_TODO_REQ) GetMsgId() interface{} {
+	return model.J从链路报警信息交互
+}
+func (e *DOWN_WARN_MSG_URGE_TODO_REQ) GetEntityBase() *model.EntityBase {
+	return e.EntityBase.GetEntityBase()
+}
+
+func (e *DOWN_WARN_MSG_URGE_TODO_REQ) GetDBSql() string {
+	return ""
+}
