@@ -6,6 +6,7 @@ import (
 
 	"github.com/tiptok/gonat/global"
 	"github.com/tiptok/gonat/model"
+
 	"github.com/tiptok/gotransfer/comm"
 	"github.com/tiptok/gotransfer/conn"
 )

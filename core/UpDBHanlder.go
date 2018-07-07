@@ -3,15 +3,14 @@ package core
 import (
 	"io/ioutil"
 	"os"
-	"time"
-
-	"sync"
-
 	"path/filepath"
+	"sync"
+	"time"
 
 	"github.com/tiptok/gonat/dbcore"
 	"github.com/tiptok/gonat/global"
 	"github.com/tiptok/gonat/model"
+
 	"github.com/tiptok/gotransfer/comm"
 )
 

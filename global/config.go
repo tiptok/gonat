@@ -1,7 +1,10 @@
 package global
 
-import "github.com/astaxie/beego/config"
-import "log"
+import (
+	"log"
+
+	"github.com/astaxie/beego/config"
+)
 
 var Param *Params
 

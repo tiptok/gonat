@@ -7,6 +7,7 @@ import (
 	"github.com/tiptok/gonat/SwitchIn808"
 	"github.com/tiptok/gonat/SwitchIn809"
 	"github.com/tiptok/gonat/global"
+
 	"github.com/tiptok/gotransfer/conn"
 )
 

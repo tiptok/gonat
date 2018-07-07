@@ -2,7 +2,6 @@ package global
 
 import (
 	"database/sql"
-
 	"log"
 
 	_ "github.com/alexbrainman/odbc"

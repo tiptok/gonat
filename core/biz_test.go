@@ -1,18 +1,17 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"testing"
-
-	"encoding/json"
-
 	"time"
 
-	"github.com/axgle/mahonia"
 	"github.com/tiptok/gonat/model"
 	"github.com/tiptok/gonat/model/jtb809/down"
 	"github.com/tiptok/gotransfer/comm"
+
+	"github.com/axgle/mahonia"
 )
 
 func TestBizDBTdf(t *testing.T) {

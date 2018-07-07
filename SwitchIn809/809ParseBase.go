@@ -5,9 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/axgle/mahonia"
 	"github.com/tiptok/gonat/model"
 	"github.com/tiptok/gonat/model/jtb809/up"
+
+	"github.com/axgle/mahonia"
 	"github.com/tiptok/gotransfer/comm"
 )
 

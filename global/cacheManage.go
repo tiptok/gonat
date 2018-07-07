@@ -1,9 +1,8 @@
 package global
 
 import (
-	"log"
-
 	"fmt"
+	"log"
 
 	"github.com/tiptok/gotransfer/comm"
 )

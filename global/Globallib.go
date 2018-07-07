@@ -1,6 +1,8 @@
 package global
 
-import "github.com/tiptok/gonat/model"
+import (
+	"github.com/tiptok/gonat/model"
+)
 
 /*上行*/
 var UpHandler IUpData

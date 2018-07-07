@@ -1,19 +1,16 @@
 package SwitchIn809
 
 import (
+	"bytes"
+	"errors"
+	"fmt"
 	"log"
 	"runtime/debug"
-
-	"errors"
-
-	"fmt"
-
-	"bytes"
-
 	"strconv"
 
 	"github.com/tiptok/gonat/global"
 	"github.com/tiptok/gonat/model"
+
 	"github.com/tiptok/gotransfer/comm"
 	"github.com/tiptok/gotransfer/conn"
 )

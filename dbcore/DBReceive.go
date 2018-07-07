@@ -1,19 +1,16 @@
 package dbcore
 
 import (
-	"database/sql"
-	"time"
-
 	"bytes"
-
-	"path/filepath"
-
+	"database/sql"
 	"fmt"
-
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/tiptok/gonat/global"
+
 	"github.com/tiptok/gotransfer/comm"
 )
 

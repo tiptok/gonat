@@ -1,8 +1,11 @@
 package global
 
-import "github.com/astaxie/beego/logs"
-import "fmt"
-import "log"
+import (
+	"fmt"
+	"log"
+
+	"github.com/astaxie/beego/logs"
+)
 
 var _log *logs.BeeLogger
 var _boolInit bool = false

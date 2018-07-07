@@ -2,19 +2,17 @@ package core
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 	"reflect"
-
-	"encoding/json"
-
-	"fmt"
-
 	"time"
 
-	"github.com/axgle/mahonia"
 	"github.com/tiptok/gonat/global"
 	"github.com/tiptok/gonat/model"
 	"github.com/tiptok/gonat/model/jtb809/down"
+
+	"github.com/axgle/mahonia"
 	"github.com/tiptok/gotransfer/comm"
 )
 

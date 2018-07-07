@@ -3,9 +3,10 @@ package SwitchIn809
 import (
 	"bytes"
 
-	"github.com/axgle/mahonia"
 	"github.com/tiptok/gonat/model"
 	"github.com/tiptok/gonat/model/jtb809/down"
+
+	"github.com/axgle/mahonia"
 	"github.com/tiptok/gotransfer/comm"
 )
 
