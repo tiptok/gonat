@@ -35,8 +35,9 @@ func init() {
 //LoadConfig load config
 func (p *Params) LoadConfig(pType string, fName string) *Params {
 	defer func() {
-		if p := recover(); p != nil {
-			log.Printf("LoadConfig 读取配置异常r! p: %v", p)
+		if rec := recover(); rec != nil {
+			p.LoadDefalut()
+			log.Printf("LoadConfig 读取配置异常r! p: %v", rec)
 			//debug.PrintStack()
 		}
 	}()
@@ -58,4 +59,8 @@ func (p *Params) LoadConfig(pType string, fName string) *Params {
 	p.VerifyCode, _ = con.Int("VerifyCode")
 	log.Printf("Load Config:%v\n", *p)
 	return p
+}
+
+func (p *Params) LoadDefalut() {
+	p.DBConnString = "driver={SQL Server};server=192.168.3.87;uid=sa;pwd=top@db123;database=TopDB;Connect Timeout=120;"
 }

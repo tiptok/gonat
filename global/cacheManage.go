@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/axgle/mahonia"
 	"github.com/tiptok/gotransfer/comm"
 )
 
@@ -40,6 +41,9 @@ func (cacheMana CacheManage) Init() (result bool) {
 	// tmpSubClisCache.NewCache("SubCliCache", 60, SubClisCacheLoader{}.Load)
 	// SubCliCache = tmpSubClisCache
 	// cacheMana.TimerManage.RegistTask(tmpSubClisCache.TimerTask)
+
+	//在线车辆列表
+	OnlineBuffer = NewOnlineList()
 
 	//启动缓存定时更新
 	cacheMana.TimerManage.Start()
@@ -140,6 +144,7 @@ LEFT OUTER JOIN bas_VehicleConfig c with(NOLOCK) ON a.VehicleId = c.VehicleId;` 
 	if err != nil {
 		Error("VehiclesCache GetData Error:%v", err)
 	}
+	enc := mahonia.NewDecoder("gbk")
 	for rows.Next() {
 		info := &VehicleInfo{}
 		err = rows.Scan(&info.PlateNum, &info.ColorCode, &info.SimNum, &info.VehicleTypeCode, &info.TerminalId, &info.TerminalTypeId, &info.ProtocolName, &info.ProtocolVersion,
@@ -148,11 +153,20 @@ LEFT OUTER JOIN bas_VehicleConfig c with(NOLOCK) ON a.VehicleId = c.VehicleId;` 
 			Error("VehiclesCache Scan Row Error:%v", err)
 			continue
 		}
+		info.PlateNum = enc.ConvertString(info.PlateNum)
+
+		// fmt.Println(info.Key(), info)
 		VehiclesCache.AddCache(info.Key(), info)
-		//fmt.Println(info, string(info.CompanyName))
 	}
 	var sKey string
 	VehiclesCache.CacheValue.Purge(sKey, 120) //清理超时
+
+	// c1 := VehiclesCache.GetCache("测B061171")
+	// if c1 == nil {
+	// 	fmt.Println("Not Exists")
+	// } else {
+	// 	fmt.Println("取到缓存车辆信息:", c1)
+	// }
 	Info("车辆基本信息缓存 Load Cache Size:%d", len(VehiclesCache.CacheValue.DataStore))
 }
 

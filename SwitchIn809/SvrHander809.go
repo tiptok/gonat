@@ -1,7 +1,6 @@
 package SwitchIn809
 
 import (
-	"encoding/hex"
 	"fmt"
 	"log"
 	"strconv"
@@ -35,7 +34,7 @@ func (trans *Tcp809Server) OnClose(c *conn.Connector) {
 //接收事件
 func (trans *Tcp809Server) OnReceive(c *conn.Connector, d conn.TcpData) bool {
 	var bUpData bool = true
-	global.Debug(global.F(global.TCP, global.SVR809, "%v On Receive Data : %v"), c.RemoteAddress, hex.EncodeToString(d.Bytes()))
+	//global.Debug(global.F(global.TCP, global.SVR809, "%vOnReceive : %v"), c.RemoteAddress, hex.EncodeToString(d.Bytes()))
 	defer func() {
 		if p := recover(); p != nil {
 			log.Printf("SvrHander809 OnReceive panic recover! p: %v", p)
@@ -76,8 +75,9 @@ func (trans *Tcp809Server) OnReceive(c *conn.Connector, d conn.TcpData) bool {
 		case model.J实时上传车辆定位信息:
 			bUpData = false
 			location := obj.(*model.UP_EXG_MSG_REAL_LOCATION)
-			chkVehicleLogin(location)
-			global.UpHandler.UpData((location).GetConvEntity())
+			if chkVehicleLogin(location) {
+				global.UpHandler.UpData((location).GetConvEntity())
+			}
 		case model.J车辆定位信息自动补报:
 			bUpData = false
 			hisLocation := obj.(*model.UP_EXG_MSG_HISTORY_LOCATION)
@@ -86,8 +86,9 @@ func (trans *Tcp809Server) OnReceive(c *conn.Connector, d conn.TcpData) bool {
 					UP_EXG_MSG: hisLocation.UP_EXG_MSG,
 					GNSS_DATA:  val,
 				}
-				chkVehicleLogin(pos)
-				global.UpHandler.UpData(pos.GetConvEntity())
+				if chkVehicleLogin(pos) {
+					global.UpHandler.UpData(pos.GetConvEntity())
+				}
 			}
 		default:
 		}
@@ -142,16 +143,20 @@ func chkPlatInfo(req *model.UP_CONNECT_REQ) (result bool, errMsg string) {
 }
 
 //检查车辆上线线
-func chkVehicleLogin(location *model.UP_EXG_MSG_REAL_LOCATION) {
-	sKey := fmt.Sprintf("%s%s", location.Vehicle_No, location.Vehicle_Color)
+func chkVehicleLogin(location *model.UP_EXG_MSG_REAL_LOCATION) bool {
+	sKey := fmt.Sprintf("%v%v", location.Vehicle_No, location.Vehicle_Color)
+
 	vehVal := global.VehiclesCache.GetCache(sKey)
 	if vehVal != nil {
 		vehInfo := vehVal.(*global.VehicleInfo)
 		location.SimNum = vehInfo.SimNum
-		if !(vehInfo.Obj.(string) == location.AccessCode) {
+		if vehInfo.Obj == nil {
 			vehInfo.Obj = location.AccessCode
 			global.OnlineBuffer.Login(vehInfo) //上线
 		}
 		global.OnlineBuffer.List.Refresh(location.SimNum) //刷新上线时间
+		return true
 	}
+	global.Debug(global.F(global.BUS, global.SVR809, "车辆未注册 %v %v %v"), location.Vehicle_No, location.Vehicle_Color, location.GNSS_DATA.GPSTIME)
+	return false
 }

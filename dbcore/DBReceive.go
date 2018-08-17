@@ -162,7 +162,7 @@ func (db *DBReceive) ExecDBTask(buf *bytes.Buffer) {
 	}()
 
 	reuslt, err := global.DBInstance().Exec(buf.String())
-	global.Error("ExecDBTask:%v%v", buf.String())
+	global.Debug("ExecDBTask:%v", buf.String())
 	if err != nil {
 		global.Error("ExecDBTask Error:%v%v", err, buf.String())
 		db.Err <- buf.String()

@@ -40,3 +40,9 @@ func (online *OnlineList) ExClean(param interface{}) {
 	var sKey string
 	online.List.PurgeWithFunc(sKey, 60*2, online.OnDelete)
 }
+
+func NewOnlineList() *OnlineList {
+	return &OnlineList{
+		List: &comm.DataContext{},
+	}
+}
