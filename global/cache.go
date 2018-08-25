@@ -16,11 +16,13 @@ type ICache interface {
 //CacheBase 缓存基类
 type CacheBase struct {
 	//Timer comm.TimerWork
-	CacheValue comm.DataContext
-	TimerTask  *comm.Task
+	CacheValue   comm.DataContext
+	TimerTask    *comm.Task
+	LastReadTime time.Time
 }
 
 func (cache *CacheBase) NewCache(cacheId string, span int, workFucn func(p interface{})) *CacheBase {
+	cache.LastReadTime, _ = time.Parse("2006-01-02 15:04:05", "2000-01-01 00:00:00")
 	cache.TimerTask = &comm.Task{
 		Interval: time.Duration(span),
 		TaskId:   cacheId,

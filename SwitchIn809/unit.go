@@ -31,7 +31,11 @@ func Byte809Descape(value []byte, startIndex int, length int) ([]byte, error) {
 			if i != ilength-1 {
 				buf.WriteByte(value[i])
 			}
+			// if value[i] == 0x5d { //到达每个个包的最后一位 退出后面的字节不做追加
+			// 	break
+			// }
 		}
+
 	}
 	return buf.Bytes(), nil
 }

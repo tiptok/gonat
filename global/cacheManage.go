@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"time"
+
 	"github.com/axgle/mahonia"
 	"github.com/tiptok/gotransfer/comm"
 )
@@ -36,12 +38,6 @@ func (cacheMana CacheManage) Init() (result bool) {
 	VehiclesCache = tmpVehicleInfoCache
 	cacheMana.TimerManage.RegistTask(tmpVehicleInfoCache.TimerTask)
 
-	//从链路clients 缓存列表
-	// tmpSubClisCache := &CacheBase{}
-	// tmpSubClisCache.NewCache("SubCliCache", 60, SubClisCacheLoader{}.Load)
-	// SubCliCache = tmpSubClisCache
-	// cacheMana.TimerManage.RegistTask(tmpSubClisCache.TimerTask)
-
 	//在线车辆列表
 	OnlineBuffer = NewOnlineList()
 
@@ -66,7 +62,7 @@ type MSPlatformInfoCacheLoader struct {
 	CacheBase
 }
 
-func (cache MSPlatformInfoCacheLoader) Load(p interface{}) {
+func (cache MSPlatformInfoCacheLoader) Load(arg interface{}) {
 	defer func() {
 		if p := recover(); p != nil {
 			Error("GetPlatformInfoCahce Recover:%v", p)
@@ -74,17 +70,29 @@ func (cache MSPlatformInfoCacheLoader) Load(p interface{}) {
 	}()
 	sql := "select CompanyId,CompanyName,AccessCode,CompanyIP,UserId,[Password] from biz_809CompanysInfoManager" //,AssociateUser,PlatformId
 	rows, err := DBInstance().Query(sql)
+	var tmpAccesscode string
 	if err != nil {
 		Error("MSPlatformInfoCahce GetData Error:%v", err)
 	}
+	dt := comm.NewDataTable(rows)
 	for rows.Next() {
-		info := &MSPlatformInfo{}
+		dt.ReadRow()
+		dt.GetColumn("AccessCode", &tmpAccesscode)
+		var info *MSPlatformInfo
+		if !PInfoCahce.ContaninKey(tmpAccesscode) {
+			info = &MSPlatformInfo{}
+		} else {
+			info = PInfoCahce.GetCache(tmpAccesscode).(*MSPlatformInfo)
+		}
+
 		err = rows.Scan(&info.CompanyId, &info.CompanyName, &info.AccessCode, &info.CompanyIP, &info.UserId, &info.Password)
 		if err != nil {
 			Error("MSPlatformInfoCahce Scan Row Error:%v", err)
 			continue
 		}
-		PInfoCahce.AddCache(info.AccessCode, info)
+		if !PInfoCahce.ContaninKey(tmpAccesscode) {
+			PInfoCahce.AddCache(info.AccessCode, info)
+		}
 		//fmt.Println(info, string(info.CompanyName))
 	}
 	Info("企业信息缓存 Load Cache Size:%d", len(PInfoCahce.CacheValue.DataStore))
@@ -125,7 +133,6 @@ func (e *VehicleInfo) SetObj(obj interface{}) {
 
 /*MSVehiclesCacheLoader 终端车辆加载器*/
 type MSVehiclesCacheLoader struct {
-	CacheBase
 }
 
 func (cache MSVehiclesCacheLoader) Load(p interface{}) {
@@ -134,19 +141,34 @@ func (cache MSVehiclesCacheLoader) Load(p interface{}) {
 			Error("VehiclesCache Recover:%v", p)
 		}
 	}()
+	//log.Println("时间:", VehiclesCache.LastReadTime.Format("2006-01-02 15:04:05"))
 	sql := `SELECT PlateNum ,a.ColorCode,a.SimNum,a.VehicleTypeCode,ISNULL(a.TerminalId,'') TerminalId,a.TerminalTypeId,p.ProtocolName,p.ProtocolVersion,
 (case when a.RecorderVersion IS null or a.RecorderVersion='' then '2012' else a.RecorderVersion end) as ADRVersion,RegFlag,ISNULL(AuthCode,'') AuthCode,ISNULL(c.LimitSpeed,0) LimitSpeed ,ISNULL(c.VehicleOperateState,0) VehicleOperateState,a.OperatorId 
 FROM bas_Vehicle a with(NOLOCK) 
 INNER JOIN bas_TerminalType t ON a.TerminalTypeId=t.TerminalTypeId
 INNER JOIN bas_Protocol p ON t.ProtocolCode=p.ProtocolCode
-LEFT OUTER JOIN bas_VehicleConfig c with(NOLOCK) ON a.VehicleId = c.VehicleId;` //,AssociateUser,PlatformId
-	rows, err := DBInstance().Query(sql)
+LEFT OUTER JOIN bas_VehicleConfig c with(NOLOCK) ON a.VehicleId = c.VehicleId
+WHERE a.UpdateTime>?` //,AssociateUser,PlatformId
+	rows, err := DBInstance().Query(sql, VehiclesCache.LastReadTime.Format("2006-01-02 15:04:05"))
+	VehiclesCache.LastReadTime = time.Now()
 	if err != nil {
 		Error("VehiclesCache GetData Error:%v", err)
 	}
 	enc := mahonia.NewDecoder("gbk")
+	dt := comm.NewDataTable(rows)
+	var tmpPlateNum, tmpColorCode, tmpKey string
 	for rows.Next() {
-		info := &VehicleInfo{}
+		var info *VehicleInfo
+		dt.ReadRow()
+		err = dt.GetColumn("PlateNum", &tmpPlateNum)
+		err = dt.GetColumn("ColorCode", &tmpColorCode)
+		tmpPlateNum = enc.ConvertString(tmpPlateNum)
+		tmpKey = fmt.Sprintf("%s%s", tmpPlateNum, tmpColorCode)
+		if !VehiclesCache.ContaninKey(tmpKey) {
+			info = &VehicleInfo{}
+		} else {
+			info = VehiclesCache.GetCache(tmpKey).(*VehicleInfo)
+		}
 		err = rows.Scan(&info.PlateNum, &info.ColorCode, &info.SimNum, &info.VehicleTypeCode, &info.TerminalId, &info.TerminalTypeId, &info.ProtocolName, &info.ProtocolVersion,
 			&info.ADRVersion, &info.RegFlag, &info.AuthCode, &info.LimitSpeed, &info.VehicleOperateState, &info.OperatorId)
 		if err != nil {
@@ -155,19 +177,15 @@ LEFT OUTER JOIN bas_VehicleConfig c with(NOLOCK) ON a.VehicleId = c.VehicleId;` 
 		}
 		info.PlateNum = enc.ConvertString(info.PlateNum)
 
-		// fmt.Println(info.Key(), info)
-		VehiclesCache.AddCache(info.Key(), info)
+		//fmt.Println(info.Key(), info, tmpKey)
+		if !VehiclesCache.ContaninKey(tmpKey) {
+			VehiclesCache.AddCache(info.Key(), info)
+		}
 	}
-	var sKey string
-	VehiclesCache.CacheValue.Purge(sKey, 120) //清理超时
+	//var sKey string
+	//VehiclesCache.CacheValue.Purge(sKey, 120) //清理超时
 
-	// c1 := VehiclesCache.GetCache("测B061171")
-	// if c1 == nil {
-	// 	fmt.Println("Not Exists")
-	// } else {
-	// 	fmt.Println("取到缓存车辆信息:", c1)
-	// }
-	Info("车辆基本信息缓存 Load Cache Size:%d", len(VehiclesCache.CacheValue.DataStore))
+	Info("车辆基本信息缓存  Cache Size:%d LastReadTime:%v ", len(VehiclesCache.CacheValue.DataStore), VehiclesCache.LastReadTime.Format("2006-01-02 15:04:05"))
 }
 
 /*从链路缓存器*/

@@ -25,6 +25,9 @@ type Params struct {
 	IC1        int
 	AccessCode []string
 	VerifyCode int
+
+	/*******DEBUG******/
+	PProfPort int
 }
 
 func init() {
@@ -57,6 +60,7 @@ func (p *Params) LoadConfig(pType string, fName string) *Params {
 	p.IC1, _ = con.Int("IC1")
 	p.AccessCode = con.Strings("AccessCode")
 	p.VerifyCode, _ = con.Int("VerifyCode")
+	p.PProfPort, _ = con.Int("PProfPort")
 	log.Printf("Load Config:%v\n", *p)
 	return p
 }

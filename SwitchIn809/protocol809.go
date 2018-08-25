@@ -111,17 +111,15 @@ func (p protocol809) ParseMsg(data []byte, c *conn.Connector) (packdata [][]byte
 			log.Printf("protocol809.ParseMsg panic recover! p: %v", p)
 		}
 	}()
-	packdata, leftdata, err = comm.ParseHelper.ParsePart(data, 0x5b, 0x5d)
+	packdata, leftdata, err = comm.ParseHelper.ParsePartWithPool(data, 0x5b, 0x5d, c.Pool)
 	if err == nil {
-		global.Debug(global.F(global.TCP, global.SVR809, "接收到数据包 : %v"), hex.EncodeToString(data))
-		for i, v := range packdata {
-			global.Debug(global.F(global.TCP, global.SVR809, "序号%d : %v"), i, hex.EncodeToString(v))
-		}
+		//global.Debug(global.F(global.TCP, global.SVR809, "接收到数据包 : %v"), hex.EncodeToString(data))
+		// for i, v := range packdata {
+		// 	global.Debug(global.F(global.TCP, global.SVR809, "序号%d : %v"), i, hex.EncodeToString(v))
+		// }
 
-		global.Debug(global.F(global.TCP, global.SVR809, "ParseMsg Package size:(%X)  LeftData:%v(%d)"), len(packdata), comm.BinaryHelper.ToBCDString(leftdata, int32(0), int32(len(leftdata))), len(leftdata))
+		//global.Debug(global.F(global.TCP, global.SVR809, "ParseMsg Package size:(%X)  LeftData:%v(%d)"), len(packdata), comm.BinaryHelper.ToBCDString(leftdata, int32(0), int32(len(leftdata))), len(leftdata))
 
-	} else {
-		//error handler
 	}
 	return packdata, leftdata, err
 }
@@ -140,6 +138,7 @@ func (p protocol809) Parse(packdata []byte) (obj interface{}, err error) {
 	//转义
 	data, err := Byte809Descape(packdata, 0, len(packdata))
 
+	global.Debug(global.F(global.TCP, global.SVR809, "收到数据: %v"), hex.EncodeToString(packdata))
 	//CRC Check
 	tmpCrc := comm.BinaryHelper.ToInt16(data, int32(len(data)-2))
 	checkCrc := comm.BinaryHelper.CRC16Check(data[:len(data)-2])
