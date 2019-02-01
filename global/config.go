@@ -30,7 +30,7 @@ type Params struct {
 	PProfPort int
 }
 
-func init() {
+func ConfigInit() {
 	Param = &Params{}
 	Param.LoadConfig("ini", "param.conf")
 }

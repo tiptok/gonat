@@ -170,4 +170,18 @@ const (
 	J远程录像回放控制消息 = 0x9A02
 
 	J下行809透传 = 0x1000
+
+	/*808*/
+	JTermCommonReply          = 0x0001
+	JPlatformCommonReply      = 0x8001
+	JTermHeartbeat            = 0x0002
+	JTransferSubPacketRequest = 0x8003
+	JTermRegister             = 0x0100
+	JTermRegisterReply        = 0x8100
+	JTermLogout               = 0x0003
+	JTermAuth                 = 0x0102
+	JTermPosition             = 0x0200
+
+	JUpgradeResult      = 0x0108
+	JSendUpgradePackage = 0x8108
 )

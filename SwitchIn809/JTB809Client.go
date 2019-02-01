@@ -80,13 +80,13 @@ func (subCli *TcpSubClient) ChKSubHeartBeart(obj interface{}) {
 				SendCmdAsync(subCli.Client.Conn, subLogin)
 			} else {
 				//发送心跳
-				heart := &model.DOWN_LINKTEST_REQ{
-					EntityBase: model.EntityBase{
-						AccessCode: subCli.AccessCode,
-						MsgId:      model.J从链路连接保持请求,
-					},
-				}
-				SendCmdAsync(subCli.Client.Conn, heart)
+				// heart := &model.DOWN_LINKTEST_REQ{
+				// 	EntityBase: model.EntityBase{
+				// 		AccessCode: subCli.AccessCode,
+				// 		MsgId:      model.J从链路连接保持请求,
+				// 	},
+				// }
+				//SendCmdAsync(subCli.Client.Conn, heart)
 			}
 		}
 	}

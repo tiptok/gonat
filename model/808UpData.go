@@ -55,7 +55,7 @@ type TermPosition struct {
 }
 
 func (e *TermPosition) GetMsgId() interface{} {
-	return e.MsgId
+	return JTermPosition
 }
 func (e *TermPosition) GetEntityBase() *EntityBase {
 	return e.EntityBase.GetEntityBase()

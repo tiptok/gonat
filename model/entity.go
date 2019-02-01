@@ -8,12 +8,15 @@ type IEntity interface {
 	GetDBSql() string
 }
 type EntityBase struct {
-	MsgId interface{}
-	//SimNum string
+	MsgId      interface{}
+	SimNum     string
 	MsgSN      int
 	SubMsgId   interface{}
 	AccessCode string
 	ReceTime   time.Time
+
+	PackageCount int
+	PackageSN    int
 }
 
 func (e *EntityBase) CmdCode() interface{} {
@@ -38,4 +41,7 @@ func (e *EntityBase) SetEntity(in EntityBase) {
 	e.MsgSN = in.MsgSN
 	e.AccessCode = in.AccessCode
 	e.ReceTime = time.Now()
+	e.SimNum = in.SimNum
+	e.PackageSN = in.PackageSN
+	e.PackageCount = in.PackageCount
 }
